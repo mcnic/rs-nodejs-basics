@@ -1,29 +1,23 @@
-import { createReadStream } from 'node:fs';
-const { createHash } = await import('node:crypto');
-import path from 'node:path';
+import { createReadStream } from 'fs';
+import { createHash } from 'crypto';
+import path from 'path';
 
 const calculateHash = async () => {
+  try {
     const hash = createHash('sha256');
     const file = path.join(
-        process.cwd(),
-        'src/hash/files/fileToCalculateHashFor.txt'
+      process.cwd(),
+      'src/hash/files/fileToCalculateHashFor.txt'
     );
 
-    const myReadStream = createReadStream(file);
-    let content = '';
+    const readStream = createReadStream(file);
 
-    myReadStream.on('data', function (chunk) {
-        content += chunk;
+    readStream.pipe(hash).on('finish', () => {
+      console.log('SHA256 hash of file:', hash.digest('hex'));
     });
-
-    myReadStream.on('error', function (err) {
-        console.error(err);
-    });
-
-    myReadStream.on('end', function () {
-        const data = hash.update(content, 'utf-8');
-        console.log(data.digest('hex'));
-    });
+  } catch (error) {
+    console.error(error.message);
+  }
 };
 
 await calculateHash();

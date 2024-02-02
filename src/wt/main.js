@@ -1,35 +1,30 @@
-import { Worker, isMainThread } from 'node:worker_threads';
-import path from 'node:path';
-import os from 'os';
+import { Worker } from 'worker_threads';
+import path from 'path';
+import { availableParallelism } from 'os';
 
 const performCalculations = async () => {
-    if (!isMainThread) return;
+  const fileName = path.join(process.cwd(), 'src/wt/worker.js');
 
-    const fileName = path.join(process.cwd(), 'src/wt/worker.js');
+  function createWorker(workerData) {
+    return new Promise(function (resolve, reject) {
+      const worker = new Worker(fileName, {
+        workerData,
+      });
+      worker.on('message', (data) => resolve({ status: 'resolved', data }));
+      worker.on('error', (err) => {
+        resolve({ status: 'error', data: null });
+        reject(err);
+      });
+    });
+  }
 
-    function createWorker(workerData) {
-        return new Promise(function (resolve, reject) {
-            const worker = new Worker(fileName, {
-                workerData,
-            });
-            worker.on('message', (data) => {
-                resolve({ status: 'resolved', data });
-                worker.terminate();
-            });
-            worker.on('error', (msg) => {
-                reject({ status: 'error', data: null });
-                worker.terminate();
-            });
-        });
-    }
-
-    const workerThreads = [];
-
-    for (let i = 0; i < os.cpus().length; i++) {
-        workerThreads.push(createWorker(10 + i));
-    }
-    const results = await Promise.all(workerThreads);
-    console.log(results);
+  const workerThreads = [];
+  const numCores = availableParallelism();
+  for (let i = 0; i < numCores; i++) {
+    workerThreads.push(createWorker(10 + i));
+  }
+  const results = await Promise.all(workerThreads);
+  console.log(results);
 };
 
 await performCalculations();

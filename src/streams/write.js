@@ -1,16 +1,15 @@
-import { createWriteStream } from 'node:fs';
-import path from 'node:path';
+import { createWriteStream } from 'fs';
+import { pipeline } from 'stream/promises';
+import path from 'path';
 
 const write = async () => {
     const filePath = path.join(
         process.cwd(),
         'src/streams/files/fileToWrite.txt'
     );
+    const writableStream = createWriteStream(filePath, { autoClose: true });
 
-    let writer = createWriteStream(filePath, { autoClose: true });
-    process.stdin.on('data', (data) => {
-        writer.write(data);
-    });
+    await pipeline(process.stdin, writableStream);
 };
 
 await write();

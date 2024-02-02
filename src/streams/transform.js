@@ -1,15 +1,19 @@
-import { Transform, pipeline } from 'stream';
+import { Transform } from 'stream';
+import { pipeline } from 'stream/promises';
 
 const transform = async () => {
+  try {
     const reverse = new Transform({
-        transform(chunk, _, callback) {
-            callback(null, chunk.reverse());
-        },
+      transform(chunk, _, callback) {
+        const reversedText = chunk.toString().split('').reverse().join('');
+        callback(null, reversedText + '\n');
+      },
     });
 
-    pipeline(process.stdin, reverse, process.stdout, (error) => {
-        if (error) process.stderr.write(error);
-    });
+    await pipeline(process.stdin, reverse, process.stdout);
+  } catch (error) {
+    process.stderr(error.message);
+  }
 };
 
 await transform();

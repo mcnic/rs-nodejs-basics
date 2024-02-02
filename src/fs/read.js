@@ -1,22 +1,14 @@
-import { existsSync } from 'node:fs';
-import { open } from 'node:fs/promises';
-import path from 'node:path';
+import { createReadStream } from 'fs';
+import path from 'path';
 
 const read = async () => {
-    const fileName = path.join(process.cwd(), 'src/fs/files/fileToRead.txt');
+  const fileToReadPath = path.join(
+    process.cwd(),
+    'src/fs/files/fileToRead.txt'
+  );
 
-    if (!existsSync(fileName)) {
-        throw new Error('FS operation failed');
-    }
-
-    try {
-        const file = await open(fileName);
-        for await (const line of file.readLines()) {
-            console.log(line);
-        }
-    } catch (err) {
-        console.error(err);
-    }
+  const readStream = createReadStream(fileToReadPath);
+  readStream.pipe(process.stdout);
 };
 
 await read();

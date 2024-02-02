@@ -1,17 +1,12 @@
-import { createReadStream } from 'node:fs';
-import path from 'node:path';
+import { createReadStream } from 'fs';
+import { pipeline } from 'stream/promises';
+import path from 'path';
 
 const read = async () => {
-    const file = path.join(process.cwd(), 'src/streams/files/fileToRead.txt');
-    const myReadStream = createReadStream(file);
+  const file = path.join(process.cwd(), 'src/streams/files/fileToRead.txt');
+  const readStream = createReadStream(file);
 
-    myReadStream.on('data', function (chunk) {
-        process.stdout.write(chunk);
-    });
-
-    myReadStream.on('error', function (err) {
-        console.error(err);
-    });
+  await pipeline(readStream, process.stdout);
 };
 
 await read();
