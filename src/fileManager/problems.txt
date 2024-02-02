@@ -1,0 +1,1 @@
+fileOparation:cat - need make as async/await, but it's generate race condition errofa-rotate-180
