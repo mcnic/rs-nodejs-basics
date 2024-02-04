@@ -6,9 +6,6 @@ export const catFile = async (pathToFile) => {
   const readStream = createReadStream(pathToFile);
 
   readStream.pipe(process.stdout);
-
-  // todo: this generate Race Condition Error after pressed any key
-  // await pipeline(readStream, process.stdout);
 };
 
 export const addFile = async (pathToFile) => {
